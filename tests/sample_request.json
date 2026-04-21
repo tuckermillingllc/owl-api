@@ -1,0 +1,42 @@
+{
+  "case_name": "http-smoke",
+  "basic_info": {
+    "status": "married",
+    "names": ["Curran", "Cydney"],
+    "sexes": ["M", "F"],
+    "date_of_birth": ["1963-01-15", "1966-01-15"],
+    "life_expectancy": [89, 92],
+    "start_date": "2026-01-01"
+  },
+  "savings_assets": {
+    "taxable_savings_balances": [90.0, 60.0],
+    "tax_deferred_savings_balances": [600.0, 150.0],
+    "tax_free_savings_balances": [70.0, 40.0],
+    "hsa_savings_balances": [0.0, 0.0],
+    "beneficiary_fractions": [1.0, 1.0, 1.0, 1.0],
+    "spousal_surplus_deposit_fraction": 0.5
+  },
+  "fixed_income": {
+    "social_security_pia_amounts": [2360.0, 1642.0],
+    "social_security_ages": [70.0, 62.083]
+  },
+  "rates_selection": {
+    "method": "historical average",
+    "from_year": 1928,
+    "to_year": 2024
+  },
+  "asset_allocation": {
+    "generic": [[[60, 40, 0, 0], [70, 30, 0, 0]], [[60, 40, 0, 0], [70, 30, 0, 0]]]
+  },
+  "optimization_parameters": {
+    "spending_profile": "smile"
+  },
+  "solver_options": {
+    "max_roth_conversion": 50.0,
+    "bequest": 0.0
+  },
+  "state_tax": {
+    "state_code": "AL",
+    "include_in_spending": true
+  }
+}

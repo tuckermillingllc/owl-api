@@ -1,0 +1,14 @@
+services:
+  owl-api:
+    build: .
+    container_name: owl-api
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8787/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
