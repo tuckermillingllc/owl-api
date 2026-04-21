@@ -1,0 +1,15 @@
+tunnel: 0dc3f897-3534-45b3-beb2-8aff55cdcd60
+credentials-file: /Users/currangehring/.cloudflared/0dc3f897-3534-45b3-beb2-8aff55cdcd60.json
+protocol: quic
+retries: 10
+grace-period: 30s
+no-autoupdate: true
+
+ingress:
+  - hostname: ssh.matrix-formulation.com
+    service: ssh://localhost:22
+  - hostname: mac-mini.matrix-formulation.com
+    service: http://localhost:5901
+  - hostname: vnc.matrix-formulation.com
+    service: http://localhost:5901
+  - service: http_status:404
