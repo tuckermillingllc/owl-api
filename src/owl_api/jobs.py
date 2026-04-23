@@ -12,7 +12,7 @@ import asyncio
 import uuid
 from typing import Awaitable, Callable
 
-from .models import JobStatus, OptimizeResult
+from .models import JobStatus, OptimizeResult, SampleResult
 
 
 class JobStore:
@@ -30,12 +30,22 @@ class JobStore:
         async with self._lock:
             return self._jobs.get(job_id)
 
+    async def set_progress(self, job_id: str, progress: float, message: str = "") -> None:
+        """Update progress for a running job. Safe no-op if job is gone."""
+        async with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return
+            job.progress = progress
+            if message:
+                job.message = message
+
     async def run(
         self,
         job_id: str,
         runner: Callable[[], Awaitable[OptimizeResult]],
     ) -> None:
-        """Background task — updates JobStatus as it progresses."""
+        """Background task for /optimize — stores the result on the job."""
         async with self._lock:
             job = self._jobs.get(job_id)
             if job is None:
@@ -50,6 +60,33 @@ class JobStore:
                 job.state = "done"
                 job.progress = 1.0
                 job.result = result
+        except Exception as e:  # noqa: BLE001
+            async with self._lock:
+                job = self._jobs[job_id]
+                job.state = "failed"
+                job.message = f"{type(e).__name__}: {e}"
+
+    async def run_sample(
+        self,
+        job_id: str,
+        runner: Callable[[], Awaitable[SampleResult]],
+    ) -> None:
+        """Background task for /sample — stores the aggregated result."""
+        async with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return
+            job.state = "running"
+            job.message = "sampling"
+
+        try:
+            result = await runner()
+            async with self._lock:
+                job = self._jobs[job_id]
+                job.state = "done"
+                job.progress = 1.0
+                job.sample_result = result
+                job.message = f"{result.trials_solved}/{result.trials_requested} solved"
         except Exception as e:  # noqa: BLE001
             async with self._lock:
                 job = self._jobs[job_id]

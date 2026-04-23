@@ -215,9 +215,51 @@ class OptimizeResult(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class PercentileRow(BaseModel):
+    """One year of aggregated Monte Carlo percentiles. All dollar amounts k$."""
+
+    year: int
+    age_a: int
+    age_b: Optional[int] = None
+    # Total household portfolio balance (taxable + tax-deferred + Roth), per percentile
+    balance_p10: float = 0.0
+    balance_p50: float = 0.0
+    balance_p90: float = 0.0
+    # Net spending after all taxes
+    spending_p10: float = 0.0
+    spending_p50: float = 0.0
+    spending_p90: float = 0.0
+    # Combined federal + state + Medicare + ACA + LTCG/NIIT
+    tax_p10: float = 0.0
+    tax_p50: float = 0.0
+    tax_p90: float = 0.0
+
+
+class SampleResult(BaseModel):
+    """Aggregate over N stochastic solves of the same case."""
+
+    case_name: str
+    method: Literal["bootstrap_sor", "histogaussian", "histolognormal"]
+    trials_requested: int
+    trials_solved: int
+    success_rate: float = 0.0
+    median_first_year_spending: Optional[float] = None
+    median_ending_balance: Optional[float] = None
+    percentiles: list[PercentileRow] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    elapsed_seconds: float = 0.0
+
+
+class SampleRequest(BaseModel):
+    case: OwlCase
+    trials: int = 50
+    method: Literal["bootstrap_sor", "histogaussian", "histolognormal"] = "bootstrap_sor"
+
+
 class JobStatus(BaseModel):
     job_id: str
     state: Literal["queued", "running", "done", "failed"]
     message: str = ""
     progress: float = 0.0
     result: Optional[OptimizeResult] = None
+    sample_result: Optional[SampleResult] = None
